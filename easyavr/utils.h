@@ -28,38 +28,58 @@
 
 #define nop() __asm__ __volatile__ ("nop")
 
-#define REGISTER8(NAME, REG) struct NAME {																		\
-	static inline uint8_t get() { return REG; }																	\
-	static inline uint8_t get_low() { return REG; }																\
-	static inline uint8_t get_high() { return 0; }																\
-																												\
-	static inline void set(uint8_t val) { REG = val; }															\
-	static inline void set_low(uint8_t val) { REG = val; }														\
-	static inline void set_high(uint8_t val) { }																\
-																												\
-	static inline void set_bit(uint8_t bit)	{ REG |= 1 << bit; }												\
-	static inline void clear_bit(uint8_t bit) { REG &= ~(1 << bit); }											\
-	static inline void toggle_bit(uint8_t bit) { REG ^= (1 << bit); }											\
-																												\
-	static inline uint8_t bit(uint8_t bit) { return (REG >> bit) & 1; }											\
-	static inline void bit(uint8_t bit, uint8_t val) { if (val) { set_bit(bit); } else { clear_bit(bit); } }	\
+#define REGISTER8(NAME, REG) struct NAME {								\
+	static inline uint8_t get() { return REG; }							\
+	static inline uint8_t get_low() { return REG; }						\
+	static inline uint8_t get_high() { return 0; }						\
+																		\
+	static inline void set(uint8_t val) { REG = val; }					\
+	static inline void set_low(uint8_t val) { REG = val; }				\
+	static inline void set_high(uint8_t val) { }						\
+																		\
+	static inline void set_bit(uint8_t bit)	{ REG |= 1 << bit; }		\
+	static inline void clear_bit(uint8_t bit) { REG &= ~(1 << bit); }	\
+	static inline void toggle_bit(uint8_t bit) { REG ^= (1 << bit); }	\
+																		\
+	static inline uint8_t bit(uint8_t bit) { return (REG >> bit) & 1; }	\
+	static inline void bit(uint8_t bit, uint8_t val) {					\
+		if (val) { set_bit(bit); }										\
+		else { clear_bit(bit); }										\
+	}																	\
 }
-#define REGISTER16(NAME, REG_LOW, REG_HIGH) struct NAME {																					\
-	static inline uint16_t get() { return (REG_HIGH << 8) | REG_LOW; }																		\
-	static inline uint8_t get_low() { return REG_LOW; }																						\
-	static inline uint8_t get_high() { return REG_HIGH; }																					\
-																																			\
-	static inline void set(uint16_t val) { REG_HIGH = val >> 8; REG_LOW = val; }															\
-	static inline void set(uint8_t val) { REG_LOW = val; }																					\
-	static inline void set_low(uint8_t val) { REG_LOW = val; }																				\
-	static inline void set_high(uint8_t val) { REG_HIGH = val; }																			\
-																																			\
-	static inline void set_bit(uint8_t bit)	{ if (bit > 7) { REG_HIGH |= 1 << (bit - 8); } else { REG_LOW |= 1 << bit; } }					\
-	static inline void clear_bit(uint8_t bit) { if (bit > 7) { REG_HIGH &= (~1 << (bit - 8)); } else { REG_LOW &= ~(1 << bit); } }			\
-	static inline void toggle_bit(uint8_t bit) { if (bit > 7) { REG_HIGH ^= 1 << (bit - 8); } else { REG_LOW ^= 1 << bit; } }				\
-																																			\
-	static inline uint8_t bit(uint8_t bit) { if (bit > 7) { return (REG_HIGH >> (bit - 8)) & 1; } else { return (REG_LOW >> bit) & 1; }	}	\
-	static inline void bit(uint8_t bit, uint8_t val) { if (val) { set_bit(bit); } else { clear_bit(bit); } }								\
+#define REGISTER16(NAME, REG_LOW, REG_HIGH) struct NAME {				\
+	static inline uint16_t get() { return (REG_HIGH << 8) | REG_LOW; }	\
+	static inline uint8_t get_low() { return REG_LOW; }					\
+	static inline uint8_t get_high() { return REG_HIGH; }				\
+																		\
+	static inline void set(uint16_t val) {								\
+		REG_HIGH = val >> 8; REG_LOW = val;								\
+	}																	\
+	static inline void set(uint8_t val) { REG_LOW = val; }				\
+	static inline void set_low(uint8_t val) { REG_LOW = val; }			\
+	static inline void set_high(uint8_t val) { REG_HIGH = val; }		\
+																		\
+	static inline void set_bit(uint8_t bit)	{							\
+		if (bit > 7) { REG_HIGH |= 1 << (bit - 8); }					\
+		else { REG_LOW |= 1 << bit; }									\
+	}																	\
+	static inline void clear_bit(uint8_t bit) {							\
+		if (bit > 7) { REG_HIGH &= (~1 << (bit - 8)); }					\
+		else { REG_LOW &= ~(1 << bit); }								\
+	}																	\
+	static inline void toggle_bit(uint8_t bit) {						\
+		if (bit > 7) { REG_HIGH ^= 1 << (bit - 8); }					\
+		else { REG_LOW ^= 1 << bit; }									\
+	}																	\
+																		\
+	static inline uint8_t bit(uint8_t bit) {							\
+		if (bit > 7) { return (REG_HIGH >> (bit - 8)) & 1; }			\
+		else { return (REG_LOW >> bit) & 1; }							\
+	}																	\
+	static inline void bit(uint8_t bit, uint8_t val) {					\
+		if (val) { set_bit(bit); }										\
+		else { clear_bit(bit); }										\
+	}																	\
 }
 #define REGISTER REGISTER8
 
