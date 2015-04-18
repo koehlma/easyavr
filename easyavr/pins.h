@@ -30,37 +30,37 @@
 
 template<typename Port, int number> struct Pin {
 	static inline void output() {
-		Port::ddr::set(Port::ddr::get() | (1 << number));
+		Port::ddr::set_bit(number);
 	}
 	static inline void input() {
-		Port::ddr::set(Port::ddr::get() & ~(1 << number));
+		Port::ddr::clear_bit(number);
 	}
 	
 	static inline uint8_t mode() {
-		return Port::ddr::get() & (1 << number) != 0;
+		return Port::ddr::bit(number);
 	}
 	static inline void mode(uint8_t val) {
-		val ? output() : input();
+		Port::ddr::bit(number, val);
 	}
 	
 	static inline void set() {
-		Port::port::set(Port::port::get() | (1 << number));
+		Port::port::set_bit(number);
 	}
 	static inline void set(uint8_t val) {
-		val ? set() : clear();
+		Port::port::bit(number, val);
 	}
 	static inline uint8_t get() {
-		return (Port::port::get() & (1 << number)) != 0;
+		return Port::port::bit(number);
 	}
 	static inline void clear() {
-		Port::port::set(Port::port::get() & ~(1 << number));
+		Port::port::clear_bit(number);
 	}
 	static inline void toggle() {
-		Port::port::set(Port::port::get() ^ (1 << number));
+		Port::port::toggle_bit(number);
 	}
 	
 	static inline uint8_t read() {
-		return (Port::pin::get() & (1 << number)) != 0;
+		return Port::pin::bit(number);
 	}
 	static inline void write(uint8_t val) {
 		set(val);
