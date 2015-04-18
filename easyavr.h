@@ -21,4 +21,8 @@
 #include "easyavr/utils.h"
 #include "easyavr/pins.h"
 
+#ifdef __AVR_ATmega2560__
+	#include "easyavr/chips/atmega2560.h"
+#endif
+
 #endif

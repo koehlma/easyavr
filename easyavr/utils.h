@@ -106,8 +106,4 @@ struct NULL_REGISTER {
 
 INLINE_CALLABLE(NULL_CALLABLE, {});
 
-#ifdef __AVR_ATmega2560__
-	#include "chips/atmega2560.h"
-#endif
-
 #endif
