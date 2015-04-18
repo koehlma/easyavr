@@ -20,6 +20,7 @@
 
 #include "easyavr/utils.h"
 #include "easyavr/pins.h"
+#include "easyavr/serial.h"
 
 #ifdef __AVR_ATmega2560__
 	#include "easyavr/chips/atmega2560.h"

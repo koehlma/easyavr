@@ -47,7 +47,7 @@
 		else { clear_bit(bit); }										\
 	}																	\
 }
-#define REGISTER16(NAME, REG_LOW, REG_HIGH) struct NAME {				\
+#define REGISTER16(NAME, REG_HIGH, REG_LOW) struct NAME {				\
 	static inline uint16_t get() { return (REG_HIGH << 8) | REG_LOW; }	\
 	static inline uint8_t get_low() { return REG_LOW; }					\
 	static inline uint8_t get_high() { return REG_HIGH; }				\
@@ -64,7 +64,7 @@
 		else { REG_LOW |= 1 << bit; }									\
 	}																	\
 	static inline void clear_bit(uint8_t bit) {							\
-		if (bit > 7) { REG_HIGH &= (~1 << (bit - 8)); }					\
+		if (bit > 7) { REG_HIGH &= ~(1 << (bit - 8)); }					\
 		else { REG_LOW &= ~(1 << bit); }								\
 	}																	\
 	static inline void toggle_bit(uint8_t bit) {						\
@@ -100,10 +100,10 @@ struct NULL_REGISTER {
 	static inline void bit(uint8_t bit, uint8_t val) { }
 };
 
-#define INLINE_CALLABLE(NAME, CODE) struct NAME {	\
-	static inline void call() { CODE; }				\
+#define MAKE_INLINE_CALLABLE(NAME, CODE) struct NAME {	\
+	static inline void call() { CODE; }					\
 }
 
-INLINE_CALLABLE(NULL_CALLABLE, {});
+MAKE_INLINE_CALLABLE(NULL_CALLABLE, {});
 
 #endif
