@@ -79,6 +79,13 @@ template<typename Port, int number> struct Pin {
 	static inline void low() {
 		clear();
 	}
+	
+	static inline void on() {
+		set();
+	}
+	static inline void off() {
+		clear();
+	}
 };
 
 #define _MAKE_PORT(STRUCTNAME, PRT) struct STRUCTNAME {		\
