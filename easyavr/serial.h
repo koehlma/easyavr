@@ -28,6 +28,7 @@
 #define SERIAL_BIT_TX_INTERRUPT		6
 #define SERIAL_BIT_RX_INTERRUPT		7
 #define SERIAL_BIT_STOP				3
+#define SERIAL_BIT_U2X				1
 
 #define SERIAL_MODE_ASYNC			0b00
 #define SERIAL_MODE_SYNC			0b01
@@ -52,9 +53,41 @@
 #define SERIAL_STATUS_OVERRUN		0b00001000
 #define SERIAL_STATUS_PARITY_ERROR	0b00000100
 
-template<typename Udr, typename Ucsr, typename Ubrr> struct Serial {
-	static inline void begin(unsigned long baudrate, uint8_t size=SERIAL_CHAR_SIZE_8) {
-		uint16_t ubrr = (((F_CPU + baudrate * 8) / (16 * baudrate)) - 1);
+#define SERIAL_U2X_DISABLED		0
+#define SERIAL_U2X_ENABLED		1
+#define SERIAL_U2X_AUTO			2
+
+#define SERIAL_ERROR_MAX		1020
+#define SERIAL_ERROR_MIN		980
+
+#ifdef URSEL
+	#define URSEL_OR (1 << URSEL)
+#else
+	#define URSEL_OR 0
+#endif
+
+#define baud_to_ubrr(baud) (((F_CPU + (baud) * 8) / (16 * (baud))) - 1)
+#define baud_to_ubrr_2x(baud) (((F_CPU + (baud) * 4) / (8 * (baud))) - 1)
+#define ubrr_to_baud(ubrr) (F_CPU / (16 * (ubrr) + 8))
+#define ubrr_to_baud_2x(ubrr) (F_CPU / (8 * (ubrr) + 4))
+#define baud_error(baud, ubrr) ((baud * 1000) / ubrr_to_baud(ubrr))
+#define baud_error_2x(baud, ubrr) ((baud * 1000) / ubrr_to_baud_2x(ubrr))
+
+template<typename Udr, typename Ucsr, typename Ubrr> struct _Serial {
+	static inline void begin(unsigned long baudrate, uint8_t size=SERIAL_CHAR_SIZE_8, uint8_t u2x=SERIAL_U2X_AUTO) {
+		uint16_t ubrr = baud_to_ubrr(baudrate);
+		if (u2x == SERIAL_U2X_AUTO) {
+			uint16_t error = baud_error(baudrate, ubrr);			
+			if (error > SERIAL_ERROR_MAX || error < SERIAL_ERROR_MIN) {
+				ubrr = baud_to_ubrr_2x(baudrate);
+				u2x = SERIAL_U2X_ENABLED;
+			} else {
+				u2x = SERIAL_U2X_DISABLED;
+			}
+		}
+		if (u2x == SERIAL_U2X_ENABLED) {
+			enable_u2x();
+		}
 		Ubrr::set(ubrr);
 		enable_rx();
 		enable_tx();
@@ -64,26 +97,44 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct Serial {
 	static inline uint8_t status() {
 		return Ucsr::a::get();
 	}
+	static inline uint8_t rx_complete() {
+		return status() & SERIAL_STATUS_RX_COMPLETE;
+	}
+	static inline uint8_t tx_complete() {
+		return status() & SERIAL_STATUS_TX_COMPLETE;
+	}
+	static inline uint8_t udr_empty() {
+		return status() & SERIAL_STATUS_UDR_EMPTY;
+	}
+	static inline uint8_t frame_error() {
+		return status() & SERIAL_STATUS_FRAME_ERROR;
+	}
+	static inline uint8_t overrun() {
+		return status() & SERIAL_STATUS_OVERRUN;
+	}
+	static inline uint8_t parity_error() {
+		return status() & SERIAL_STATUS_PARITY_ERROR;
+	}
 	
 	static inline uint8_t mode() {
 		return Ucsr::c::get() >> 6;
 	}
 	static inline void mode(uint8_t val) {
-		Ucsr::c::set((Ucsr::get() & 0b00111111) | (val << 6));
+		Ucsr::c::set((Ucsr::get() & 0b00111111) | (val << 6) | URSEL_OR);
 	}
 	
 	static inline uint8_t parity() {
 		return (Ucsr::c::get() >> 4) & 0b11;
 	}
 	static inline void parity(uint8_t val) {
-		Ucsr::c::set((Ucsr::get() & 0b11001111) | (val << 4));
-	}
+		Ucsr::c::set((Ucsr::get() & 0b11001111) | (val << 4) | URSEL_OR);
+	}	
 	
 	static inline uint8_t stop_bit() {
 		return Ucsr::c::bit(SERIAL_BIT_STOP);
 	}	
 	static inline void stop_bit(uint8_t val) {
-		Ucsr::c::bit(SERIAL_BIT_STOP, val);
+		Ucsr::c::set((Ucsr::c::get() & 0b11110111) | ((val & 1) << 3) | URSEL_OR);
 	}
 	
 	static inline uint8_t char_size() {
@@ -91,7 +142,7 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct Serial {
 	}
 	static inline void char_size(uint8_t val) {
 		Ucsr::b::bit(2, (val >> 2) & 1);
-		Ucsr::c::set((Ucsr::c::get() & 0b11111001) | ((val & 0b11) << 1));
+		Ucsr::c::set((Ucsr::c::get() & 0b11111001) | ((val & 0b11) << 1) | URSEL_OR);
 	}
 	
 	static inline void enable_rx() {
@@ -105,6 +156,22 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct Serial {
 	}
 	static inline void disable_tx() {
 		Ucsr::b::clear_bit(SERIAL_BIT_TX_ENABLE);
+	}
+	static inline uint8_t rx_is_enabled() {
+		return Ucsr::b::bit(SERIAL_BIT_RX_ENABLE);
+	}
+	static inline uint8_t tx_is_enabled() {
+		return Ucsr::b::bit(SERIAL_BIT_TX_ENABLE);
+	}
+	
+	static inline void enable_u2x() {
+		Ucsr::a::set_bit(SERIAL_BIT_U2X);
+	}	
+	static inline void disable_u2x() {
+		Ucsr::a::clear_bit(SERIAL_BIT_U2X);
+	}
+	static inline uint8_t u2x_is_enabled() {
+		return Ucsr::a::bit(SERIAL_BIT_U2X);
 	}
 	
 	static inline void enable_rx_interrupt() {
@@ -124,6 +191,15 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct Serial {
 	}
 	static inline void disable_udr_interrupt() {
 		Ucsr::b::clear_bit(SERIAL_BIT_UDR_INTERRUPT);
+	}	
+	static inline uint8_t rx_interrupt_is_enabled() {
+		return Ucsr::b::bit(SERIAL_BIT_RX_INTERRUPT);
+	}
+	static inline uint8_t tx_interrupt_is_enabled() {
+		return Ucsr::b::bit(SERIAL_BIT_TX_INTERRUPT);
+	}
+	static inline uint8_t udr_interrupt_is_enabled() {
+		return Ucsr::b::bit(SERIAL_BIT_UDR_INTERRUPT);
 	}
 	
 	static inline void put(uint8_t data) {
@@ -133,6 +209,7 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct Serial {
 		Udr::set(data & 0xff);
 		Ucsr::b::bit(0, (data >> 8));
 	}
+	
 	static inline uint8_t get() {
 		return Udr::get();
 	}
@@ -150,7 +227,7 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct Serial {
 		REGISTER8(c, UCSR##NUMBER##C);										\
 	};																		\
 	REGISTER16(Ubrr##NUMBER, UBRR##NUMBER##H, UBRR##NUMBER##L);				\
-	typedef Serial<Udr##NUMBER, Ucsr##NUMBER, Ubrr##NUMBER> Serial##NUMBER
+	typedef _Serial<Udr##NUMBER, Ucsr##NUMBER, Ubrr##NUMBER> Serial##NUMBER
 
 #ifdef UDR
 	#define UDR0 UDR
@@ -169,6 +246,9 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct Serial {
 		#define SERIAL0_TX_INTERRUPT USART0_TX_vect
 	#endif
 	MAKE_SERIAL(0);
+	#define SERIAL_RX_INTERRUPT SERIAL0_RX_INTERRUPT
+	#define SERIAL_TX_INTERRUPT SERIAL0_TX_INTERRUPT
+	typedef Serial0 Serial;
 #endif
 
 #ifdef UDR1
