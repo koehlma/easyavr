@@ -18,8 +18,6 @@
 #ifndef ATTINY2313_H_
 #define ATTINY2313_H_
 
-#include <avr/io.h>
-
 #include "../pins.h"
 
 typedef Pin<PortA, 2> Pin1;

@@ -23,12 +23,15 @@
 #include "easyavr/pins.h"
 #include "easyavr/serial.h"
 
-#ifdef __AVR_ATmega2560__
+#if defined(__AVR_ATmega2560__)
     #include "easyavr/chips/atmega2560.h"
 #endif
-
-#ifdef __AVR_ATtiny2313__
+#if defined(__AVR_ATtiny2313__)
     #include "easyavr/chips/attiny2313.h"
+#endif
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega328__)  || defined(__AVR_ATmega168__) || \
+    defined(__AVR_ATmega328P__)
+    #include "easyavr/chips/atmega8_328_168.h"
 #endif
 
 #endif
