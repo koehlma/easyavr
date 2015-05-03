@@ -15,20 +15,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EASYAVR_H_
-#define EASYAVR_H_
+#ifndef ATTINY2313_H_
+#define ATTINY2313_H_
 
-#include "easyavr/core.h"
+#include <avr/io.h>
 
-#include "easyavr/pins.h"
-#include "easyavr/serial.h"
+#include "../pins.h"
 
-#ifdef __AVR_ATmega2560__
-    #include "easyavr/chips/atmega2560.h"
-#endif
-
-#ifdef __AVR_ATtiny2313__
-    #include "easyavr/chips/attiny2313.h"
-#endif
+typedef Pin<PortA, 2> Pin1;
+typedef Pin<PortD, 0> Pin2;
+typedef Pin<PortD, 1> Pin3;
+typedef Pin<PortA, 1> Pin4;
+typedef Pin<PortA, 0> Pin5;
+typedef Pin<PortD, 2> Pin6;
+typedef Pin<PortD, 3> Pin7;
+typedef Pin<PortD, 4> Pin8;
+typedef Pin<PortD, 5> Pin9;
+typedef Pin<PortD, 6> Pin11;
+typedef Pin<PortB, 0> Pin12;
+typedef Pin<PortB, 1> Pin13;
+typedef Pin<PortB, 2> Pin14;
+typedef Pin<PortB, 3> Pin15;
+typedef Pin<PortB, 4> Pin16;
+typedef Pin<PortB, 5> Pin17;
+typedef Pin<PortB, 6> Pin18;
+typedef Pin<PortB, 7> Pin19;
 
 #endif
