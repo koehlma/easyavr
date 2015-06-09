@@ -20,6 +20,8 @@
 
 #include <inttypes.h>
 
+#define NULL 0
+
 #define enable_interrupts() sei()
 #define disable_interrupts() cli()
 

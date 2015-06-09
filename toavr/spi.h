@@ -18,4 +18,19 @@
 #ifndef SPI_H_
 #define SPI_H_
 
+template<typename Clock, typename Out, typename In, typename Select> struct SoftSPI {
+    static void transfer() {
+        select();
+        // TODO
+        unselect();
+    }
+    
+    static void inline select() {
+        Select::low();
+    }    
+    static void inline unselect() {
+        Select::high();
+    }
+};
+
 #endif

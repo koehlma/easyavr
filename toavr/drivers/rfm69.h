@@ -18,4 +18,8 @@
 #ifndef RFM69_H_
 #define RFM69_H_
 
+template<typename SPI, typename Interrupt> struct RFM69 {
+        
+};
+
 #endif
