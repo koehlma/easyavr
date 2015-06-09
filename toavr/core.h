@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UTILS_H_
-#define UTILS_H_
+#ifndef CORE_H_
+#define CORE_H_
 
 #include <inttypes.h>
 

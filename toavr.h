@@ -15,23 +15,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EASYAVR_H_
-#define EASYAVR_H_
+#ifndef TOAVR_H_
+#define TOAVR_H_
 
-#include "easyavr/core.h"
+#include "toavr/core.h"
 
-#include "easyavr/pins.h"
-#include "easyavr/serial.h"
+#include "toavr/pins.h"
+#include "toavr/serial.h"
 
 #if defined(__AVR_ATmega2560__)
-    #include "easyavr/chips/atmega2560.h"
+    #include "toavr/chips/atmega2560.h"
 #endif
 #if defined(__AVR_ATtiny2313__)
-    #include "easyavr/chips/attiny2313.h"
+    #include "toavr/chips/attiny2313.h"
 #endif
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega328__)  || defined(__AVR_ATmega168__) || \
-    defined(__AVR_ATmega328P__)
-    #include "easyavr/chips/atmega8_328_168.h"
+        defined(__AVR_ATmega328P__)
+    #include "toavr/chips/atmega8_328_168.h"
 #endif
 
 #endif
