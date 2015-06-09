@@ -1,8 +1,8 @@
 # ToAVR
 Type oriented AVR
 
-## Example
-
+## Examples
+### Serial: interrupt driven
 ```c++
 #define F_CPU 16000000UL
 
@@ -13,7 +13,7 @@ Type oriented AVR
 volatile uint8_t byte = 0;
 
 ISR(SERIAL_RX_INTERRUPT) {
-	byte = Serial0::get();
+	byte = Serial::get();
 }
 
 int main(void) {	
@@ -28,6 +28,27 @@ int main(void) {
     while(1) {
         while (!(Serial::udr_empty())) { };
 		Serial::put(byte);
+    }
+}
+```
+
+### Serial: print and read line
+```c++
+#define F_CPU 16000000UL
+
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
+#include "toavr.h"
+
+char line[257];
+
+int main(void) {
+    Serial::begin(115200UL);
+    
+    while (1) {
+        Serial::readline(line, 256);
+        Serial::printline(line);
     }
 }
 ```

@@ -215,7 +215,42 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct _Serial {
     }
     static inline uint16_t get9() {
         return Udr::get() | (Ucsr::b::bit(1) << 8);
-    }    
+    }
+    static void print(const char *message) {
+        while(*message) {
+            while (!(udr_empty())) { };
+            put(*message);
+            message++;
+        }
+    }
+    static void read(char *buffer, uint16_t length) {
+        uint16_t i;
+        for (i = 0; i < length; i++) {
+            while (!rx_complete()) { };
+            buffer[i] = get();
+        }
+        buffer[i] = '\0';
+    }
+    static void read(char *buffer, char delimiter, uint16_t max_length) {
+        uint16_t i;
+        for (i = 0; i < max_length; i++) {
+            while (!rx_complete()) { };
+            buffer[i] = get();
+            if (buffer[i] == delimiter) {
+                break;
+            }
+        }
+        buffer[i] = '\0';
+    }
+    
+    static void readline(char *buffer, uint16_t max_length) {
+       read(buffer, '\n', max_length);
+    }
+    static void printline(const char *message) {
+        print(message);
+        while (!(udr_empty())) { };
+        put('\n');
+    }
 };
 
 
