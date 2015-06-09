@@ -29,9 +29,8 @@
 #if defined(__AVR_ATtiny2313__)
     #include "toavr/chips/attiny2313.h"
 #endif
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega328__)  || defined(__AVR_ATmega168__) || \
-        defined(__AVR_ATmega328P__)
-    #include "toavr/chips/atmega8_328_168.h"
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega328__)  || defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
+    #include "toavr/chips/atmega8.h"
 #endif
 
 #endif

@@ -216,6 +216,7 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct _Serial {
     static inline uint16_t get9() {
         return Udr::get() | (Ucsr::b::bit(1) << 8);
     }
+    
     static void print(const char *message) {
         while(*message) {
             while (!(udr_empty())) { };
@@ -223,6 +224,7 @@ template<typename Udr, typename Ucsr, typename Ubrr> struct _Serial {
             message++;
         }
     }
+       
     static void read(char *buffer, uint16_t length) {
         uint16_t i;
         for (i = 0; i < length; i++) {
