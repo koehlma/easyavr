@@ -8,7 +8,7 @@ Type oriented AVR
 
 #include <avr/interrupt.h>
 
-#include "easyavr.h"
+#include "toavr.h"
 
 volatile uint8_t byte = 0;
 
